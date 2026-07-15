@@ -51,7 +51,7 @@ function ProductForm({ product, categories, onClose, onSave, isSaving }) {
     setUploading(true);
     try {
       const res = await fetch(
-        "http://localhost:5000/api/v1/products/upload-image",
+        `${import.meta.env.VITE_API_URL}/products/upload-image`,
         {
           method: "POST",
           credentials: "include",
