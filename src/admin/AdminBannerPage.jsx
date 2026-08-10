@@ -21,7 +21,7 @@ function BannerForm({ onClose }) {
     formData.append("banner", file);
     setUploading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1"}/banners/upload`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/banners/upload`, {
         method: "POST",
         credentials: "include",
         body: formData,
