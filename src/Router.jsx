@@ -13,6 +13,9 @@ import OrderSuccessPage from "./pages/OrderSuccessPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import WishlistPage from "./pages/WishlistPage";
+import HelpPage from "./pages/HelpPage";
+import MyTicketsPage from "./pages/MyTicketsPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 import LoginPage from "./auth/LoginPage";
 import RegisterPage from "./auth/RegisterPage";
@@ -25,6 +28,9 @@ import AdminCouponPage from "./admin/AdminCouponPage";
 import AdminUserDetailPage from "./admin/AdminUserDetailPage";
 import AdminOrderDetailPage from "./admin/AdminOrderDetailPage";
 import AdminSubscriberPage from "./admin/AdminSubscriberPage";
+import AdminReturnPage from "./admin/AdminReturnPage";
+import AdminBannerPage from "./admin/AdminBannerPage";
+import AdminHelpPage from "./admin/AdminHelpPage";
 
 import { useAuth } from "./context/AuthContext";
 
@@ -56,6 +62,8 @@ const router = createBrowserRouter([
       { path: "/shop", element: <ShopPage /> },
       { path: "/product/:id", element: <ProductDetailsPage /> },
       { path: "/cart", element: <CartPage /> },
+      { path: "/help", element: <HelpPage /> },
+      { path: "/notifications", element: <NotificationsPage /> },
 
       // Protected — must be logged in
       {
@@ -66,6 +74,7 @@ const router = createBrowserRouter([
           { path: "/orders", element: <OrderPage /> },
           { path: "/profile", element: <ProfilePage /> },
           { path: "/wishlist", element: <WishlistPage /> },
+          { path: "/my-tickets", element: <MyTicketsPage /> },
         ],
       },
 
@@ -93,6 +102,9 @@ const router = createBrowserRouter([
           { path: "/admin/users/:id", element: <AdminUserDetailPage /> },
           { path: "/admin/coupons", element: <AdminCouponPage /> },
           { path: "/admin/subscribers", element: <AdminSubscriberPage /> },
+          { path: "/admin/returns", element: <AdminReturnPage /> },
+          { path: "/admin/banners", element: <AdminBannerPage /> },
+          { path: "/admin/help", element: <AdminHelpPage /> },
         ],
       },
     ],

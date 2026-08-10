@@ -45,13 +45,19 @@ const STATUS_CONFIG = {
 
 const STATUS_OPTIONS = ["PROCESSING", "SHIPPING", "DELIVERED", "CANCELLED"];
 
-export default function AdminOrderDetailPage({ hideCustomerInfo = false }) {
+
+export default function AdminOrderDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: order, isLoading } = useOrderDetail(id);
   const updateStatus = useUpdateOrderStatus();
   const [searchParams] = useSearchParams();
   const fromUser = searchParams.get("from") === "user";
+  const fromReturn = searchParams.get("from") === "return";
+
+  const hideCustomerInfo = fromUser || fromReturn;
+
+
 
   function handleUpdateStatus(status) {
     updateStatus.mutate(
@@ -82,10 +88,19 @@ export default function AdminOrderDetailPage({ hideCustomerInfo = false }) {
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <p className="text-gray-400">Order not found</p>
         <button
-          onClick={() => navigate(fromUser ? -1 : "/admin/orders")}
+          onClick={() =>
+            navigate(
+              fromUser ? -1 : fromReturn ? "/admin/returns" : "/admin/orders",
+            )
+          }
           className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors text-sm font-medium w-fit"
         >
-          <ArrowLeft size={16} /> {fromUser ? "Back to User" : "Back to Orders"}
+          <ArrowLeft size={16} />
+          {fromUser
+            ? "Back to User"
+            : fromReturn
+              ? "Back to Returns"
+              : "Back to Orders"}
         </button>
       </div>
     );
@@ -327,7 +342,7 @@ export default function AdminOrderDetailPage({ hideCustomerInfo = false }) {
           )}
 
           {/* Update status */}
-          
+
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <h2 className="font-black text-gray-800 mb-4">Update Status</h2>
             <div className="flex flex-col gap-2">

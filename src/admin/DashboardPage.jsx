@@ -4,8 +4,6 @@ import {
   Users,
   ClipboardList,
   TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight,
   Package,
 } from "lucide-react";
 import {
@@ -86,37 +84,29 @@ export default function DashboardPage() {
   const stats = [
     {
       label: "Total Revenue",
-      value: `${formatCurrency(totalRevenue || 0)}`,
-      change: "+12%",
-      up: true,
+      value: formatCurrency(totalRevenue || 0),
       icon: <TrendingUp size={20} />,
       color: "bg-blue-600",
     },
     {
       label: "Total Orders",
       value: totalOrders || 0,
-      change: "+8%",
-      up: true,
       icon: <ClipboardList size={20} />,
       color: "bg-orange-500",
     },
     {
       label: "Total Products",
       value: totalProducts || 0,
-      change: "+3%",
-      up: true,
       icon: <ShoppingBag size={20} />,
       color: "bg-green-500",
     },
     {
       label: "Total Users",
       value: totalUsers || 0,
-      change: "+5%",
-      up: true,
       icon: <Users size={20} />,
       color: "bg-purple-500",
     },
-  ];
+  ]; 
 
   const recentOrders = [...orders]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -134,32 +124,16 @@ export default function DashboardPage() {
       {/* ── STAT CARDS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div
-                className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center text-white`}
-              >
-                {stat.icon}
-              </div>
-              <span
-                className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-full
-                ${stat.up ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"}`}
-              >
-                {stat.up ? (
-                  <ArrowUpRight size={11} />
-                ) : (
-                  <ArrowDownRight size={11} />
-                )}
-                {stat.change}
-              </span>
-            </div>
-            <p className="text-2xl font-black text-gray-900">{stat.value}</p>
-            <p className="text-sm text-gray-400 mt-0.5">{stat.label}</p>
-          </div>
-        ))}
+  <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+    <div className="flex items-start justify-between mb-4">
+      <div className={`w-10 h-10 ${stat.color} rounded-xl flex items-center justify-center text-white`}>
+        {stat.icon}
+      </div>
+    </div>
+    <p className="text-2xl font-black text-gray-900">{stat.value}</p>
+    <p className="text-sm text-gray-400 mt-0.5">{stat.label}</p>
+  </div>
+))}
       </div>
 
       {/* ── AREA CHART — Revenue over time ── */}

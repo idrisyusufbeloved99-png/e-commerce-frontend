@@ -26,11 +26,7 @@ export default function CartPage() {
 
   // ── totals ──
   const shipping =
-    appliedCoupon?.discountType === "FREE_SHIPPING"
-      ? 0
-      : cartTotal > 50000
-        ? 0
-        : 1500;
+    appliedCoupon?.discountType === "FREE_SHIPPING" ? 0 : 100000 ? 0 : 1500;
 
   const discount = appliedCoupon
     ? appliedCoupon.discountType === "FREE_SHIPPING"
@@ -38,8 +34,7 @@ export default function CartPage() {
       : appliedCoupon.discountAmount
     : 0;
 
-  const tax = cartTotal * 0.075;
-  const grandTotal = cartTotal + shipping + tax - discount;
+  const grandTotal = cartTotal + shipping - discount;
 
   function handleApplyCoupon() {
     if (!couponCode.trim()) return;
@@ -266,16 +261,9 @@ export default function CartPage() {
                 </div>
               )}
 
-              <div className="flex justify-between text-gray-500">
-                <span>Tax (7.5%)</span>
-                <span className="font-semibold text-gray-800">
-                  {formatCurrency(tax)}
-                </span>
-              </div>
-
               {shipping > 0 && !appliedCoupon && (
                 <div className="bg-blue-50 text-blue-600 text-xs font-medium rounded-xl px-4 py-2.5 text-center">
-                  Add {formatCurrency(50000 - cartTotal)} more for free
+                  Add {formatCurrency(100000 - cartTotal)} more for free
                   shipping!
                 </div>
               )}

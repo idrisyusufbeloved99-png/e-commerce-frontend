@@ -59,7 +59,7 @@ function ProductForm({ product, categories, onClose, onSave, isSaving }) {
         },
       );
       const data = await res.json();
-      console.log("Upload response:", res.ok, data); // ← add this
+      console.log("Upload response:", res.ok, data);
       if (!res.ok) throw new Error(data.error);
       setImages((prev) => [...prev, data.imageUrl]);
       toast.success("Image uploaded!");
@@ -88,7 +88,9 @@ function ProductForm({ product, categories, onClose, onSave, isSaving }) {
           originalPrice: product.originalPrice || "",
           stock: product.stock,
           description: product.description || "",
-          homeFeature: product.homeFeature || false,
+          badge: product.badge || "",
+          homeFeature:
+            product.homeFeature === true || product.homeFeature === "true", // ← fix
         }
       : {
           name: "",
@@ -97,11 +99,11 @@ function ProductForm({ product, categories, onClose, onSave, isSaving }) {
           originalPrice: "",
           stock: "",
           description: "",
-          homeFeature: false
+          badge: "",
+          homeFeature: false,
         },
   });
 
-  // ✅ imageUrl correctly included here
   function onSubmit(data) {
     onSave({
       id: product?.id,
@@ -113,7 +115,10 @@ function ProductForm({ product, categories, onClose, onSave, isSaving }) {
       description: data.description,
       imageUrl: images[0] || null, // first image = main
       images: images.slice(1), // rest = gallery
+      badge: data.badge || null,
+      homeFeature: data.homeFeature === true || data.homeFeature === "true",
     });
+
   }
 
   return (
@@ -339,6 +344,35 @@ function ProductForm({ product, categories, onClose, onSave, isSaving }) {
             />
           </div>
 
+          {/* Badge*/}
+          <div>
+            <label className="text-xs font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+              Badge{" "}
+              <span className="text-gray-400 font-normal normal-case">
+                (optional label shown on product)
+              </span>
+            </label>
+            <div className="relative">
+              <select
+                {...register("badge")}
+                className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm outline-none focus:border-blue-400 transition-colors cursor-pointer"
+              >
+                <option value="">No Badge</option>
+                <option value="New">🆕 New</option>
+                <option value="Sale">🏷️ Sale</option>
+                <option value="Hot">🔥 Hot</option>
+              </select>
+              <ChevronDown
+                size={14}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Note: Discount % is shown automatically when Original Price is
+              higher than Unit Price
+            </p>
+          </div>
+
           {/* Home Feature */}
           <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
             <input
@@ -519,7 +553,7 @@ export default function AdminProductPage() {
                       </p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="font-black text-gray-900 text-sm">
-                         {formatCurrency(p.unitPrice)}
+                          {formatCurrency(p.unitPrice)}
                         </span>
                         <span
                           className={`text-xs font-bold px-2 py-0.5 rounded-full
@@ -564,7 +598,7 @@ export default function AdminProductPage() {
                       ].map((h) => (
                         <th
                           key={h}
-                          className="text-left px-6 py-3 text-xs font-black text-gray-500 uppercase tracking-wider"
+                          className="text-left px-6 py-3 text-xs font-black text-gray-500 uppercase tracking-wider min-w-[120px]"
                         >
                           {h}
                         </th>
@@ -616,8 +650,8 @@ export default function AdminProductPage() {
                         <td className="px-6 py-4 text-gray-600">{p.stock}</td>
                         <td className="px-6 py-4">
                           <span
-                            className={`text-xs font-bold px-2.5 py-1 rounded-full
-                            ${p.status === "ACTIVE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"}`}
+                            className={`text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap
+  ${p.status === "ACTIVE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"}`}
                           >
                             {p.status === "ACTIVE" ? "Active" : "Out of Stock"}
                           </span>

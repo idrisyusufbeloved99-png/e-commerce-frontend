@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Package, Heart, LogOut, Edit2 } from "lucide-react";
+import { User, Package, Heart, LogOut, Edit2, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
@@ -120,6 +120,11 @@ export default function ProfilePage() {
                 icon: <Heart size={16} />,
                 label: "Wishlist",
                 path: "/wishlist",
+              },
+              {
+                icon: <MessageSquare size={16} />,
+                label: "Support Tickets",
+                path: "/my-tickets",
               },
             ].map((item) => (
               <Link

@@ -143,6 +143,9 @@ export default function AdminOrderPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selected, setSelected] = useState(null);
 
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
   const { data: orders = [], isLoading } = useAllOrders();
   const updateStatus = useUpdateOrderStatus();
   const navigate = useNavigate();
@@ -165,7 +168,14 @@ export default function AdminOrderPage() {
       o.id.toLowerCase().includes(search.toLowerCase()) ||
       (o.user?.username || "").toLowerCase().includes(search.toLowerCase()) ||
       o.email.toLowerCase().includes(search.toLowerCase());
-    return matchSearch && (filterStatus === "all" || o.status === filterStatus);
+
+    const matchStatus = filterStatus === "all" || o.status === filterStatus;
+
+    const orderDate = new Date(o.createdAt);
+    const matchFrom = !dateFrom || orderDate >= new Date(dateFrom);
+    const matchTo = !dateTo || orderDate <= new Date(dateTo + "T23:59:59");
+
+    return matchSearch && matchStatus && matchFrom && matchTo;
   });
 
   const counts = orders.reduce((acc, o) => {
@@ -273,6 +283,42 @@ export default function AdminOrderPage() {
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
             />
           </div>
+        </div>
+        {/* Date range filter */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-400 transition-colors flex-1">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">
+              From
+            </span>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="flex-1 text-sm outline-none text-gray-700 cursor-pointer"
+            />
+          </div>
+          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm focus-within:border-blue-400 transition-colors flex-1">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider shrink-0">
+              To
+            </span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="flex-1 text-sm outline-none text-gray-700 cursor-pointer"
+            />
+          </div>
+          {(dateFrom || dateTo) && (
+            <button
+              onClick={() => {
+                setDateFrom("");
+                setDateTo("");
+              }}
+              className="text-sm font-bold text-red-400 hover:text-red-600 transition-colors px-3"
+            >
+              Clear dates
+            </button>
+          )}
         </div>
 
         {/* Mobile cards */}
@@ -401,7 +447,7 @@ export default function AdminOrderPage() {
                             {order.items?.length}
                           </td>
                           <td className="px-5 py-4 font-black text-gray-800">
-                           {formatCurrency(order.total)}
+                            {formatCurrency(order.total)}
                           </td>
                           <td className="px-5 py-4">
                             <span

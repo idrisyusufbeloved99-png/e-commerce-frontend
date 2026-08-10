@@ -7,7 +7,6 @@ import { useCategories } from "../hooks/useCategories";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "../utils/formatCurrency";
 
-
 const SORT_OPTIONS = [
   { value: "default", label: "Featured" },
   { value: "price-asc", label: "Price: Low → High" },
@@ -33,64 +32,117 @@ function StarRating({ rating }) {
   );
 }
 
+function ProductCardSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+      <Skeleton className="aspect-[4/3] w-full" />
+      <div className="p-4 flex flex-col gap-2">
+        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-3 w-3/4" />
+        <Skeleton className="h-5 w-16 mt-1" />
+      </div>
+    </div>
+  );
+}
+
 function ProductCard({ product }) {
   const { addToCart } = useCart();
-  const catLabel = product.category?.name || "";
+  const catName = product.category?.name || "";
   const catEmoji = product.category?.emoji || "🛍️";
+  const price = Number(product.unitPrice);
+  const original = product.originalPrice ? Number(product.originalPrice) : null;
+  const discount =
+    original && original > price
+      ? Math.round((1 - price / original) * 100)
+      : null;
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-50 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-      <Link to={`/product/${product.id}`} className="block">
-        <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          ) : (
-            <span className="text-5xl sm:text-6xl opacity-50 group-hover:scale-110 transition-transform duration-500">
-              {catEmoji}
+    <Link
+      to={`/product/${product.id}`}
+      className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-blue-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
+    >
+      {/* Image */}
+      <div className="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <span className="text-5xl sm:text-6xl opacity-40 group-hover:scale-110 transition-transform duration-500">
+            {catEmoji}
+          </span>
+        )}
+
+        {/* Badge */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {discount && (
+            <span className="text-[10px] font-bold bg-green-500 text-white px-2 py-0.5 rounded-full w-fit">
+              -{discount}%
             </span>
           )}
           {product.badge && (
             <span
-              className={`absolute top-2 left-2 text-[10px] sm:text-xs font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full
-              ${product.badge === "Sale" ? "bg-orange-500 text-white" : "bg-blue-600 text-white"}`}
+              className={`text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full shadow-sm w-fit
+      ${
+        product.badge === "Sale"
+          ? "bg-orange-500 text-white"
+          : product.badge === "Hot"
+            ? "bg-red-500 text-white"
+            : "bg-blue-600 text-white"
+      }`}
             >
-              {product.badge}
+              {product.badge === "Hot" ? "🔥 Hot" : product.badge}
             </span>
           )}
         </div>
-      </Link>
-      <div className="p-3 sm:p-4 flex flex-col flex-1">
-        <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider">
-          {catLabel}
+      </div>
+
+      {/* Info */}
+      <div className="p-3 sm:p-4 flex flex-col gap-2 flex-1">
+        <span className="text-[10px] sm:text-xs font-semibold text-blue-500 uppercase tracking-wider">
+          {catName}
         </span>
-        <Link to={`/product/${product.id}`}>
-          <h3 className="font-bold text-gray-800 text-xs sm:text-sm mt-1 mb-1.5 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
-            {product.name}
-          </h3>
-        </Link>
-        <div className="flex items-center gap-1 mb-2">
-          <StarRating rating={product.rating || 0} />
-          <span className="text-[10px] text-gray-400">
+
+        <h3 className="font-bold text-gray-800 text-xs sm:text-sm leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 flex-1">
+          {product.name}
+        </h3>
+
+        {/* Stars */}
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star
+              key={s}
+              size={10}
+              className={
+                s <= Math.round(product.rating || 0)
+                  ? "text-orange-400 fill-orange-400"
+                  : "text-gray-200 fill-gray-200"
+              }
+            />
+          ))}
+          <span className="text-[10px] text-gray-400 ml-0.5">
             ({product.reviewsCount || 0})
           </span>
         </div>
-        <div className="flex items-center justify-between gap-1 mt-auto">
-          <div className="flex items-baseline gap-1 flex-wrap">
-            <span className="font-black text-gray-900 text-sm sm:text-base">
-              {formatCurrency(product.unitPrice)}
-            </span>
-            {product.originalPrice && (
-              
-              <span className="text-[10px] sm:text-xs text-gray-400 line-through">
-                {formatCurrency(product.originalPrice)}
-              </span>
 
+        {/* Price row */}
+        <div className="flex flex-col gap-2 mt-auto pt-2">
+          {/* Price */}
+          <div>
+            <p className="font-black text-gray-900 text-sm leading-none">
+              {formatCurrency(price)}
+            </p>
+            {original && (
+              <p className="text-[10px] text-gray-400 line-through mt-0.5">
+                {formatCurrency(original)}
+              </p>
             )}
           </div>
+
+          {/* Add button — full width */}
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -98,35 +150,19 @@ function ProductCard({ product }) {
               addToCart({
                 id: product.id,
                 name: product.name,
-                price: Number(product.unitPrice),
-                category: catLabel,
-                imageUrl: product.imageUrl || null, // ← add this
+                price,
+                category: catName,
+                imageUrl: product.imageUrl || null,
               });
             }}
-            className="shrink-0 text-[10px] sm:text-xs bg-blue-600 hover:bg-orange-500 text-white px-2 sm:px-3 py-1.5 rounded-lg font-bold transition-colors"
+            disabled={product.stock === 0}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl transition-colors"
           >
-            Add
+            {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ProductCardSkeleton() {
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
-      <Skeleton className="aspect-square w-full" />
-      <div className="p-3 sm:p-4 flex flex-col gap-2">
-        <Skeleton className="h-3 w-16" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-3 w-3/4" />
-        <div className="flex justify-between items-center mt-1">
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-8 w-12 rounded-lg" />
-        </div>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -364,7 +400,9 @@ export default function ShopPage() {
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
                     <span>$0</span>
-                    <span className="font-bold text-blue-600">{formatCurrency(priceRange[1])}</span>
+                    <span className="font-bold text-blue-600">
+                      {formatCurrency(priceRange[1])}
+                    </span>
                   </div>
                 </div>
               </div>

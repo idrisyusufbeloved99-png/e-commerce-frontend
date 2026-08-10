@@ -9,6 +9,7 @@ import { ShieldCheck, ArrowRight, Loader2, Tag } from "lucide-react";
 import request from "../api/client.js";
 import { formatCurrency } from "../utils/formatCurrency";
 
+
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
@@ -33,16 +34,17 @@ export default function CheckoutPage() {
   const shipping =
     appliedCoupon?.discountType === "FREE_SHIPPING"
       ? 0
-      : cartTotal > 50000 ? 0 : 1500;
+      : cartTotal > 100000
+        ? 0
+        : 1500;
 
   const discount = appliedCoupon
     ? appliedCoupon.discountType === "FREE_SHIPPING"
       ? 0
       : appliedCoupon.discountAmount
     : 0;
-
-  const tax = cartTotal * 0.075;
-  const grandTotal = cartTotal + shipping + tax - discount;
+  
+  const grandTotal = cartTotal + shipping;
 
   if (cartItems.length === 0) {
     return (
@@ -58,14 +60,15 @@ export default function CheckoutPage() {
     );
   }
 
-  async function createOrder(formData) {
+  async function createOrder(formData, paystackRef) {
     const items = cartItems.map((item) => ({
       productId: item.id,
       quantity: item.qty,
       price: item.price,
     }));
 
-    await request("/orders", {
+    const order = await request("/orders", {
+      // ← capture response
       method: "POST",
       body: JSON.stringify({
         items,
@@ -75,8 +78,11 @@ export default function CheckoutPage() {
         address: formData.address,
         city: formData.city,
         state: formData.state,
+        paystackRef,
       }),
     });
+
+    return order; // ← return it
   }
 
   function onSubmit(data) {
@@ -85,18 +91,18 @@ export default function CheckoutPage() {
     const amountInKobo = Math.round(grandTotal * 100);
 
     function onPaymentSuccess(response) {
-      createOrder(data)
-        .then(() => {
-          // increment coupon usedCount if one was applied
+      createOrder(data, response.reference)
+        .then((order) => {
+          // ← capture the returned order
           if (appliedCoupon) {
             useCoupon.mutate(appliedCoupon.code);
             localStorage.removeItem("appliedCoupon");
           }
           clearCart();
-          toast.success("Order placed successfully! 🎉", {
-            description: `Payment ref: ${response.reference}`,
-          });
-          navigate("/order-success");
+          toast.success("Order placed successfully! 🎉");
+          navigate("/order-success", {
+            state: { orderId: order.id, reference: response.reference },
+          }); // ← pass order ID via state
         })
         .catch((err) => {
           toast.error("Payment received but order failed. Contact support.");
@@ -321,8 +327,7 @@ export default function CheckoutPage() {
                       <p className="text-xs text-gray-400">x{item.qty}</p>
                     </div>
                     <span className="text-xs font-bold text-gray-800 shrink-0">
-                     {formatCurrency(item.price * item.qty)}
-
+                      {formatCurrency(item.price * item.qty)}
                     </span>
                   </div>
                 ))}
@@ -349,7 +354,9 @@ export default function CheckoutPage() {
                 {discount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount ({appliedCoupon?.code})</span>
-                    <span className="font-bold">-{formatCurrency(discount)}</span>
+                    <span className="font-bold">
+                      -{formatCurrency(discount)}
+                    </span>
                   </div>
                 )}
                 {appliedCoupon?.discountType === "FREE_SHIPPING" && (
@@ -364,16 +371,10 @@ export default function CheckoutPage() {
                     <span
                       className={`font-semibold ${shipping === 0 ? "text-green-500" : "text-gray-800"}`}
                     >
-                      {shipping === 0 ? "FREE" : `{formatCurrency(shipping)}`}
+                      {shipping === 0 ? "FREE" : `${formatCurrency(shipping)}`}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between text-gray-500">
-                  <span>Tax</span>
-                  <span className="font-semibold text-gray-800">
-                    {formatCurrency(tax)}
-                  </span>
-                </div>
                 <div className="flex justify-between font-black text-gray-900 text-base border-t border-gray-100 pt-2 mt-1">
                   <span>Total</span>
                   <span>{formatCurrency(grandTotal)}</span>

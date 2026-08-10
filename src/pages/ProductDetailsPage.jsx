@@ -18,6 +18,8 @@ import {
   useRemoveFromWishlist,
 } from "../hooks/useWishlist";
 import { formatCurrency } from "../utils/formatCurrency";
+import { useMyOrders } from "../hooks/useOrders";
+import { useAuth } from "@/context/AuthContext";
 
 function StarRating({ rating, size = 14 }) {
   return (
@@ -60,6 +62,8 @@ export default function ProductDetailsPage() {
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
 
+  const { user, isAuthenticated } = useAuth();
+
   const { data: product, isLoading, isError } = useProduct(id);
 
   // review form state
@@ -71,6 +75,17 @@ export default function ProductDetailsPage() {
   const { data: wishlist = [] } = useWishlist();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
+
+  const { data: myOrders = [] } = useMyOrders();
+
+  const hasPurchased = myOrders.some(
+    (order) =>
+      order.status !== "CANCELLED" &&
+      order.items?.some(
+        (item) =>
+          item.productId === product?.id || item.product?.id === product?.id,
+      ),
+  );
 
   const allImages = [
     ...(product?.imageUrl ? [product.imageUrl] : []),
@@ -141,6 +156,8 @@ export default function ProductDetailsPage() {
         onError: (err) => {
           if (err.message.includes("already reviewed")) {
             toast.error("You already reviewed this product");
+          } else if (err.message.includes("purchased")) {
+            toast.error("You can only review products you've purchased");
           } else if (
             err.message.includes("Authentication") ||
             err.message.includes("token")
@@ -157,16 +174,21 @@ export default function ProductDetailsPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-400 mb-8">
-        <Link to="/" className="hover:text-blue-600 transition-colors">
+      <div className="flex items-center gap-2 text-sm text-gray-400 mb-6 sm:mb-8 overflow-hidden">
+        <Link to="/" className="hover:text-blue-600 transition-colors shrink-0">
           Home
         </Link>
-        <span>/</span>
-        <Link to="/shop" className="hover:text-blue-600 transition-colors">
+        <span className="shrink-0">/</span>
+        <Link
+          to="/shop"
+          className="hover:text-blue-600 transition-colors shrink-0"
+        >
           Shop
         </Link>
-        <span>/</span>
-        <span className="text-gray-700 font-medium">{product.name}</span>
+        <span className="shrink-0">/</span>
+        <span className="text-gray-700 font-medium truncate">
+          {product.name}
+        </span>
       </div>
 
       <div className="flex flex-col md:flex-row gap-12">
@@ -183,12 +205,19 @@ export default function ProductDetailsPage() {
             ) : (
               <span className="text-9xl opacity-40">{catEmoji}</span>
             )}
+
             {product.badge && (
               <span
-                className={`absolute top-5 left-5 text-sm font-bold px-3 py-1.5 rounded-full
-        ${product.badge === "Sale" ? "bg-orange-500 text-white" : "bg-blue-600 text-white"}`}
+                className={`absolute top-2 left-2 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full shadow-sm
+    ${
+      product.badge === "Sale"
+        ? "bg-orange-500 text-white"
+        : product.badge === "Hot"
+          ? "bg-red-500 text-white"
+          : "bg-blue-600 text-white"
+    }`}
               >
-                {product.badge} {discount && `−${discount}%`}
+                {product.badge === "Hot" ? "🔥 Hot" : product.badge}
               </span>
             )}
             <button
@@ -243,20 +272,23 @@ export default function ProductDetailsPage() {
             </span>
           </div>
 
-          <div className="flex items-end gap-3">
-            <span className="text-4xl font-black text-gray-900">
-              {formatCurrency(price)}
-            </span>
-            {originalPrice && (
-              <>
-                <span className="text-xl text-gray-400 line-through mb-0.5">
-                  {formatCurrency(originalPrice)}
-                </span>
-                <span className="text-sm font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-lg mb-0.5">
-                  Save {discount}%
-                </span>
-              </>
-            )}
+          {/* Price */}
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-wrap items-end gap-2">
+              <span className="text-3xl sm:text-4xl font-black text-gray-900">
+                {formatCurrency(price)}
+              </span>
+              {originalPrice && (
+                <>
+                  <span className="text-base sm:text-xl text-gray-400 line-through mb-0.5">
+                    {formatCurrency(originalPrice)}
+                  </span>
+                  <span className="text-sm font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-lg mb-0.5">
+                    Save {discount}%
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
           <p className="text-gray-500 leading-relaxed">
@@ -292,7 +324,7 @@ export default function ProductDetailsPage() {
             )}
 
             {/* CTA buttons */}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 disabled={product.stock === 0}
                 onClick={() => {
@@ -343,47 +375,65 @@ export default function ProductDetailsPage() {
         </h2>
 
         {/* Write a review */}
-        <form
-          onSubmit={handleSubmitReview}
-          className="border border-gray-100 rounded-2xl p-5 mb-8 max-w-2xl flex flex-col gap-4"
-        >
-          <p className="font-bold text-gray-800 text-sm">Write a review</p>
-
-          <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setReviewRating(star)}
-              >
-                <Star
-                  size={22}
-                  className={
-                    star <= reviewRating
-                      ? "text-orange-400 fill-orange-400"
-                      : "text-gray-200 fill-gray-200"
-                  }
-                />
-              </button>
-            ))}
-          </div>
-
-          <textarea
-            value={reviewComment}
-            onChange={(e) => setReviewComment(e.target.value)}
-            placeholder="Share your thoughts about this product..."
-            rows={3}
-            className="border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400 transition-colors resize-none"
-          />
-
-          <button
-            type="submit"
-            disabled={createReview.isPending}
-            className="self-start bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-colors"
+        {hasPurchased ? (
+          <form
+            onSubmit={handleSubmitReview}
+            className="border border-gray-100 rounded-2xl p-5 mb-8 max-w-2xl flex flex-col gap-4"
           >
-            {createReview.isPending ? "Submitting..." : "Submit Review"}
-          </button>
-        </form>
+            <p className="font-bold text-gray-800 text-sm">Write a review</p>
+
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setReviewRating(star)}
+                >
+                  <Star
+                    size={22}
+                    className={
+                      star <= reviewRating
+                        ? "text-orange-400 fill-orange-400"
+                        : "text-gray-200 fill-gray-200"
+                    }
+                  />
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Share your thoughts about this product..."
+              rows={3}
+              className="border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-blue-400 transition-colors resize-none"
+            />
+
+            <button
+              type="submit"
+              disabled={createReview.isPending}
+              className="self-start bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-colors"
+            >
+              {createReview.isPending ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+        ) : (
+          <div className="border border-gray-100 rounded-2xl p-5 mb-8 max-w-2xl bg-gray-50 text-center">
+            <p className="text-sm text-gray-400 font-medium">
+              {isAuthenticated
+                ? "Purchase this product to leave a review"
+                : "Log in and purchase this product to leave a review"}
+            </p>
+            {!isAuthenticated && (
+              <Link
+                to="/login"
+                className="text-sm text-blue-600 hover:underline font-bold mt-1 block"
+              >
+                Log in →
+              </Link>
+            )}
+          </div>
+        )}
 
         {reviews.length === 0 ? (
           <p className="text-gray-400 text-sm">
