@@ -311,7 +311,6 @@ export default function HomePage() {
 
             {/* ── RIGHT — Category image grid ── */}
             <div className="w-full lg:w-[520px] shrink-0 self-end">
-              {/* ── REPLACE THE IMAGE URLs BELOW WITH YOUR CLOUDINARY URLS ── */}
               {(() => {
                 const categoryImages = [
                   {
@@ -388,8 +387,10 @@ export default function HomePage() {
 
                         {/* Label */}
                         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                          <p className="text-white/60 text-xs mt-1 relative z-10">
-                            {cat._count?.products ?? 0} items
+                          <p
+                            className={`text-white font-black leading-none ${index === 0 ? "text-xl sm:text-2xl" : "text-sm sm:text-base"}`}
+                          >
+                            {cat.label}
                           </p>
                           <div className="flex items-center gap-1 mt-1.5 text-white/70 text-xs font-semibold group-hover:gap-2 transition-all">
                             Shop now <ArrowRight size={10} />
