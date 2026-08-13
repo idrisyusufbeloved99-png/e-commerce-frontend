@@ -13,13 +13,14 @@ export default function LoginPage() {
   } = useForm();
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   async function onSubmit(data) {
     setLoading(true);
     try {
-      const result = await login(data.email, data.password);
+      const result = await login(data.email, data.password, rememberMe); // ← pass it
       toast.success("Welcome back! 👋", {
         description: `Logged in as ${result.user.username}`,
       });
@@ -29,7 +30,6 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
-    
   }
 
   return (
@@ -135,17 +135,20 @@ export default function LoginPage() {
               )}
             </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-gray-600 cursor-pointer">
-                <input type="checkbox" className="accent-blue-600 rounded" />
-                Remember me
-              </label>
-              <a
-                href="#"
-                className="text-blue-600 hover:text-blue-700 font-medium"
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-blue-600 cursor-pointer rounded"
+              />
+              <label
+                htmlFor="rememberMe"
+                className="text-sm text-gray-500 cursor-pointer"
               >
-                Forgot password?
-              </a>
+                Remember me for 30 days
+              </label>
             </div>
 
             <button

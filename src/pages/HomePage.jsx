@@ -268,36 +268,41 @@ export default function HomePage() {
               </p>
 
               {/* CTAs */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+              <div className="flex items-center justify-center lg:justify-start gap-3">
                 <Link
                   to="/shop"
-                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-black text-sm transition-all shadow-xl shadow-orange-500/30 hover:-translate-y-0.5"
+                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3.5 rounded-xl font-black text-sm transition-all shadow-xl shadow-orange-500/30 hover:-translate-y-0.5"
                 >
                   Shop Now <ArrowRight size={16} />
                 </Link>
                 <Link
                   to="/shop"
-                  className="flex items-center gap-2 border border-white/20 hover:border-white/40 text-white hover:bg-white/10 px-8 py-4 rounded-xl font-bold text-sm transition-all"
+                  className="flex items-center gap-2 border border-white/20 hover:border-white/40 text-white hover:bg-white/10 px-6 py-3.5 rounded-xl font-bold text-sm transition-all"
                 >
                   Browse Deals
                 </Link>
               </div>
 
               {/* Stats */}
-              <div className="flex items-center justify-center lg:justify-start gap-6 pt-2 pb-8 lg:pb-16">
+              <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-2 pb-8 lg:pb-16 flex-wrap">
                 {[
                   { value: "12K+", label: "Customers" },
                   { value: "500+", label: "Products" },
                   { value: "99%", label: "Satisfaction" },
                   { value: "24/7", label: "Support" },
                 ].map((stat, i) => (
-                  <div key={stat.label} className="flex items-center gap-6">
-                    {i > 0 && <div className="w-px h-8 bg-white/10" />}
+                  <div
+                    key={stat.label}
+                    className="flex items-center gap-4 sm:gap-6"
+                  >
+                    {i > 0 && <div className="w-px h-7 bg-white/10" />}
                     <div className="text-center lg:text-left">
-                      <p className="text-lg sm:text-xl font-black text-white">
+                      <p className="text-base sm:text-xl font-black text-white">
                         {stat.value}
                       </p>
-                      <p className="text-xs text-slate-500">{stat.label}</p>
+                      <p className="text-[10px] sm:text-xs text-slate-500">
+                        {stat.label}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -383,10 +388,8 @@ export default function HomePage() {
 
                         {/* Label */}
                         <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                          <p
-                            className={`text-white font-black leading-none ${index === 0 ? "text-xl sm:text-2xl" : "text-sm sm:text-base"}`}
-                          >
-                            {cat.label}
+                          <p className="text-white/60 text-xs mt-1 relative z-10">
+                            {cat._count?.products ?? 0} items
                           </p>
                           <div className="flex items-center gap-1 mt-1.5 text-white/70 text-xs font-semibold group-hover:gap-2 transition-all">
                             Shop now <ArrowRight size={10} />
@@ -452,7 +455,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      
       {/* ── CATEGORIES ── */}
       <section className="max-w-7xl mx-auto px-4 py-20">
         <div className="flex items-end justify-between mb-10">

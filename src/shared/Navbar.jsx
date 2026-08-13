@@ -247,7 +247,7 @@ function NotifDropdownContent({
       <div className="max-h-72 overflow-y-auto">
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center px-4">
-            <Bell size={28} className="text-gray-200" />
+            <Bell size={15} className="text-gray-200" />
             <p className="text-gray-400 text-sm font-medium">
               No notifications yet
             </p>
@@ -519,9 +519,9 @@ export default function Navbar() {
                     onMouseLeave={() =>
                       window.innerWidth >= 640 && setNotifOpen(false)
                     }
-                    className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all"
+                    className="relative flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all"
                   >
-                    <Bell size={17} />
+                    <Bell size={18} />
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-[9px] sm:text-[10px] font-black rounded-full flex items-center justify-center shadow-lg animate-pulse">
                         {unreadCount > 9 ? "9+" : unreadCount}
